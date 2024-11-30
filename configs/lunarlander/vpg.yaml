@@ -1,0 +1,34 @@
+environment_name: 'LunarLander-v3'
+agent:
+  type: 'VPG'
+  hyperparameters:
+    gamma: 0.99
+    learning_rate: 0.001
+    batch_size: 16
+
+    network_architecture:
+      policy_network:
+        - type: 'Linear'
+          out_features: 64
+        - type: 'ReLU'
+        - type: 'Linear'
+          out_features: 64
+        - type: 'ReLU'
+      value_network:
+        - type: 'Linear'
+          out_features: 64
+        - type: 'ReLU'
+        - type: 'Linear'
+          out_features: 64
+        - type: 'ReLU'
+
+training:
+  num_episodes: 30000
+logging:
+  wandb_project: 'rl-algos'
+  use_wandb: false
+  verbose: 100
+
+  show_episode: true
+  video_dir: 'logs/lunarlander/vpg'
+  save_video_frequency: 100

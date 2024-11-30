@@ -2,23 +2,25 @@ environment_name: 'CartPole-v1'
 agent:
   type: 'DQN'
   hyperparameters:
-    learning_rate: 0.001
+    learning_rate: 0.0005
     gamma: 0.99
     epsilon_start: 1.0
     epsilon_end: 0.01
-    epsilon_decay: 400
+    epsilon_decay: 0.997
 
     replay_buffer_size: 10000
     target_update_frequency: 10
-    batch_size: 64
+    batch_size: 128
 
     network_architecture:
       - type: 'Linear'
-        out_features: 10
+        out_features: 20
       - type: 'ReLU'
-      # Implicit Linear layer with out_features=num_actions
+      - type: 'Linear'
+        out_features: 20
+      - type: 'ReLU'
 training:
-  num_episodes: 500
+  num_episodes: 1000
   max_steps_per_episode: 1000
 logging:
   wandb_project: 'rl-algos'

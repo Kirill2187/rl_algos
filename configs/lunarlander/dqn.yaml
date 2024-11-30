@@ -1,4 +1,4 @@
-environment_name: 'CartPole-v1'
+environment_name: 'LunarLander-v3'
 agent:
   type: 'DQN'
   hyperparameters:
@@ -6,7 +6,7 @@ agent:
     gamma: 0.99
     epsilon_start: 1.0
     epsilon_end: 0.01
-    epsilon_decay: 400
+    epsilon_decay: 0.995
 
     replay_buffer_size: 10000
     target_update_frequency: 10
@@ -14,17 +14,19 @@ agent:
 
     network_architecture:
       - type: 'Linear'
-        out_features: 10
+        out_features: 64
       - type: 'ReLU'
-      # Implicit Linear layer with out_features=num_actions
+      - type: 'Linear'
+        out_features: 64
+      - type: 'ReLU'
+
 training:
-  num_episodes: 500
-  max_steps_per_episode: 1000
+  num_episodes: 1000
 logging:
   wandb_project: 'rl-algos'
   use_wandb: false
-  verbose: 100
+  verbose: 10
 
   show_episode: true
-  video_dir: 'logs/cartpole/dqn'
-  save_video_frequency: 100
+  video_dir: 'logs/lunarlander/dqn'
+  save_video_frequency: 50

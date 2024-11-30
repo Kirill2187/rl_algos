@@ -1,5 +1,6 @@
 import os
 from src.agents import DQNAgent
+from src.agents import VPGAgent
 from src.utils.logger import Logger
 from src.utils.seeding import set_seeds
 from src.utils.visualization import show_episode
@@ -24,7 +25,7 @@ class ExperimentManager:
             gym.make(
                 config['environment_name'],
                 render_mode='rgb_array' if self.save_video_frequency > 0 else None,
-                max_episode_steps=config['training']['max_steps_per_episode']
+                max_episode_steps=config['training'].get('max_steps_per_episode')
             ),
             video_folder=self.video_dir,
             episode_trigger=lambda e: e % self.save_video_frequency == 0 if self.save_video_frequency > 0 else False
@@ -34,16 +35,12 @@ class ExperimentManager:
         self.agent = self._initialize_agent()
         self.total_steps = 0
 
-
     def _initialize_agent(self):
         agent_type = self.config['agent']['type']
         if agent_type == 'DQN':
-            model = torch.nn.Sequential(
-                torch.nn.Linear(self.env.observation_space.shape[0], 10),
-                torch.nn.ReLU(),
-                torch.nn.Linear(10, self.env.action_space.n)
-            )
-            return DQNAgent(self.env, model, self.config['agent']['hyperparameters'])
+            return DQNAgent(self.env, self.config['agent']['hyperparameters'])
+        elif agent_type == 'VPG':
+            return VPGAgent(self.env, self.config['agent']['hyperparameters'])
         else:
             raise ValueError(f"Unsupported agent type: {agent_type}")
 
@@ -72,8 +69,9 @@ class ExperimentManager:
                 'episode': episode,
                 'total_reward': total_reward,
                 'running_total_reward': running_total_reward,
-                'epsilon': self.agent.epsilon,
             }
+            if 'epsilon' in self.agent.__dict__:
+                metrics['epsilon'] = self.agent.epsilon
             self.logger.log_metrics(metrics, episode=episode)
 
         self.logger.finish()

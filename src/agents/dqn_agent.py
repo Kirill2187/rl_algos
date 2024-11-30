@@ -5,12 +5,12 @@ import random
 import numpy as np
 from src.agents.agent import Agent
 import gymnasium as gym
-from copy import deepcopy
 from collections import deque
+from src.utils.network_builder import build_network
 
 
 class DQNAgent(Agent):
-    def __init__(self, env: gym.Env, model: nn.Module, hyperparameters: dict):
+    def __init__(self, env: gym.Env, hyperparameters: dict):
         self.env = env
 
         self.learning_rate = hyperparameters['learning_rate']
@@ -22,8 +22,17 @@ class DQNAgent(Agent):
         self.target_update_frequency = hyperparameters['target_update_frequency']
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-        self.policy_net = model.to(self.device)
-        self.target_net = deepcopy(self.policy_net).to(self.device)
+        architecture_config = hyperparameters['network_architecture']
+        self.policy_net = build_network(
+            env.observation_space.shape[0],
+            env.action_space.n, architecture_config
+        ).to(self.device)
+        self.target_net = build_network(
+            env.observation_space.shape[0],
+            env.action_space.n, architecture_config
+        ).to(self.device)
+        self.target_net.load_state_dict(self.policy_net.state_dict())
+        self.target_net.eval()
 
         self.optimizer = optim.Adam(self.policy_net.parameters(), lr=self.learning_rate)
         self.criterion = nn.MSELoss()
@@ -54,7 +63,7 @@ class DQNAgent(Agent):
 
         q_values = self.policy_net(states).gather(1, actions).squeeze()
         with torch.no_grad():
-            next_q_values = self.target_net(next_states).max(dim=1)[0]
+            next_q_values = self.target_net(next_states).max(dim=1)[0].detach()
             target_q_values = rewards + self.gamma * next_q_values * (1 - dones)
 
         loss = self.criterion(q_values, target_q_values)
@@ -65,4 +74,4 @@ class DQNAgent(Agent):
     def after_episode(self, episode):
         if episode % self.target_update_frequency == 0:
             self.target_net.load_state_dict(self.policy_net.state_dict())
-        self.epsilon = max(self.epsilon_end, self.epsilon * np.exp(-1.0 / self.epsilon_decay))
+        self.epsilon = max(self.epsilon_end, self.epsilon * self.epsilon_decay)

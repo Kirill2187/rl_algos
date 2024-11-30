@@ -1,0 +1,35 @@
+environment_name: 'CartPole-v1'
+agent:
+  type: 'VPG'
+  hyperparameters:
+    learning_rate: 0.001
+    gamma: 0.995
+    batch_size: 1
+
+    network_architecture:
+      policy_network:
+        - type: 'Linear'
+          out_features: 20
+        - type: 'ReLU'
+        - type: 'Linear'
+          out_features: 20
+        - type: 'ReLU'
+      value_network:
+        - type: 'Linear'
+          out_features: 20
+        - type: 'ReLU'
+        - type: 'Linear'
+          out_features: 20
+        - type: 'ReLU'
+
+training:
+  num_episodes: 50000
+  max_steps_per_episode: 1000
+logging:
+  wandb_project: 'rl-algos'
+  use_wandb: false
+  verbose: 10
+
+  show_episode: true
+  video_dir: 'logs/cartpole/vpg'
+  save_video_frequency: 1000
