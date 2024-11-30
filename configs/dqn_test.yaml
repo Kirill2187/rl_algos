@@ -1,0 +1,24 @@
+environment_name: 'CartPole-v1'
+agent:
+  type: 'DQN'
+  hyperparameters:
+    learning_rate: 0.001
+    gamma: 0.99
+    epsilon_start: 1.0
+    epsilon_end: 0.01
+    epsilon_decay: 400
+
+    replay_buffer_size: 10000
+    target_update_frequency: 10
+    batch_size: 64
+training:
+  num_episodes: 500
+  max_steps_per_episode: 1000
+logging:
+  wandb_project: 'rl-algos'
+  use_wandb: false
+  verbose: 100
+
+  show_episode: true
+  video_dir: 'logs/cartpole/dqn'
+  save_video_frequency: 100
