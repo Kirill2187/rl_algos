@@ -75,11 +75,11 @@ class VPGAgent(Agent):
 
         rewards_to_go = np.array(rewards_to_go)
         rewards_to_go = torch.tensor(rewards_to_go, dtype=torch.float32, requires_grad=False).to(self.device)
-        rewards_to_go -= value_predictions.detach()
+        weights = rewards_to_go - value_predictions.detach()
 
         distributions = torch.distributions.Categorical(logits=self.policy_net(states))
         log_probs = distributions.log_prob(actions)
-        policy_loss = -(log_probs * rewards_to_go).mean()
+        policy_loss = -(log_probs * weights).mean()
 
         value_loss = self.value_criterion(value_predictions, rewards_to_go)
 
